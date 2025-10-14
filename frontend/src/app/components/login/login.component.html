@@ -1,0 +1,197 @@
+<div class="modern-auth-container">
+  <div class="auth-glass">
+    <!-- Logo y Título -->
+    <div class="auth-header">
+      <div class="logo">
+        <div class="logo-icon">🚀</div>
+        <h1>Proyecto SENA</h1>
+      </div>
+      <p class="tagline">Sistema de Gestión Productiva</p>
+    </div>
+
+    <!-- Pestañas Login/Registro -->
+    <div class="tab-container">
+      <div class="tabs">
+        <button 
+          class="tab-button" 
+          [class.active]="isLoginMode"
+          (click)="switchMode()"
+          [disabled]="isLoading">
+          Iniciar Sesión
+        </button>
+        <button 
+          class="tab-button" 
+          [class.active]="!isLoginMode"
+          (click)="switchMode()"
+          [disabled]="isLoading">
+          Registrarse
+        </button>
+      </div>
+      <div class="tab-indicator" [class.register]="!isLoginMode"></div>
+    </div>
+
+    <!-- Estado del Sistema -->
+    <div class="system-status" [class]="backendStatus">
+      <div class="status-dot"></div>
+      <span class="status-text">
+        <span *ngIf="backendStatus === 'online'">Sistema conectado</span>
+        <span *ngIf="backendStatus === 'offline'">Sistema no disponible</span>
+        <span *ngIf="backendStatus === 'checking'">Verificando sistema...</span>
+      </span>
+    </div>
+
+    <!-- Formulario de LOGIN -->
+    <form *ngIf="isLoginMode" [formGroup]="loginForm" (ngSubmit)="onLogin()" class="auth-form">
+      <div class="input-group">
+        <div class="input-wrapper">
+          <i class="icon">👤</i>
+          <input 
+            type="text" 
+            formControlName="username"
+            class="modern-input"
+            placeholder="Nombre de usuario"
+            [class.error]="lf['username'].invalid && lf['username'].touched">
+        </div>
+        <div *ngIf="lf['username'].invalid && lf['username'].touched" class="error-text">
+          ⚠️ Usuario requerido
+        </div>
+      </div>
+
+      <div class="input-group">
+        <div class="input-wrapper">
+          <i class="icon">🔒</i>
+          <input 
+            type="password" 
+            formControlName="password"
+            class="modern-input"
+            placeholder="Contraseña"
+            [class.error]="lf['password'].invalid && lf['password'].touched">
+        </div>
+        <div *ngIf="lf['password'].invalid && lf['password'].touched" class="error-text">
+          ⚠️ Contraseña requerida
+        </div>
+      </div>
+
+      <button 
+        type="submit" 
+        class="modern-btn primary"
+        [disabled]="loginForm.invalid || isLoading">
+        <span *ngIf="!isLoading">Acceder al Sistema</span>
+        <span *ngIf="isLoading" class="btn-loading">
+          <div class="spinner"></div>
+          Procesando...
+        </span>
+      </button>
+
+      <div class="demo-credentials">
+        <p>💡 <strong>Credenciales de prueba:</strong></p>
+        <p>Usuario: <code>admin</code> | Contraseña: <code>1234</code></p>
+      </div>
+    </form>
+
+    <!-- Formulario de REGISTRO -->
+    <form *ngIf="!isLoginMode" [formGroup]="registerForm" (ngSubmit)="onRegister()" class="auth-form">
+      <div class="input-group">
+        <div class="input-wrapper">
+          <i class="icon">👤</i>
+          <input 
+            type="text" 
+            formControlName="username"
+            class="modern-input"
+            placeholder="Nombre de usuario"
+            [class.error]="rf['username'].invalid && rf['username'].touched">
+        </div>
+        <div *ngIf="rf['username'].invalid && rf['username'].touched" class="error-text">
+          <span *ngIf="rf['username'].errors?.['required']">⚠️ Usuario requerido</span>
+          <span *ngIf="rf['username'].errors?.['minlength']">⚠️ Mínimo 3 caracteres</span>
+        </div>
+      </div>
+
+      <div class="input-group">
+        <div class="input-wrapper">
+          <i class="icon">📧</i>
+          <input 
+            type="email" 
+            formControlName="email"
+            class="modern-input"
+            placeholder="Correo electrónico"
+            [class.error]="rf['email'].invalid && rf['email'].touched">
+        </div>
+        <div *ngIf="rf['email'].invalid && rf['email'].touched" class="error-text">
+          <span *ngIf="rf['email'].errors?.['required']">⚠️ Email requerido</span>
+          <span *ngIf="rf['email'].errors?.['email']">⚠️ Formato de email inválido</span>
+        </div>
+      </div>
+
+      <div class="input-group">
+        <div class="input-wrapper">
+          <i class="icon">🔒</i>
+          <input 
+            type="password" 
+            formControlName="password"
+            class="modern-input"
+            placeholder="Contraseña"
+            [class.error]="rf['password'].invalid && rf['password'].touched">
+        </div>
+        <div *ngIf="rf['password'].invalid && rf['password'].touched" class="error-text">
+          <span *ngIf="rf['password'].errors?.['required']">⚠️ Contraseña requerida</span>
+          <span *ngIf="rf['password'].errors?.['minlength']">⚠️ Mínimo 4 caracteres</span>
+        </div>
+      </div>
+
+      <div class="input-group">
+        <div class="input-wrapper">
+          <i class="icon">✅</i>
+          <input 
+            type="password" 
+            formControlName="confirmPassword"
+            class="modern-input"
+            placeholder="Confirmar contraseña"
+            [class.error]="rf['confirmPassword'].invalid && rf['confirmPassword'].touched">
+        </div>
+        <div *ngIf="rf['confirmPassword'].invalid && rf['confirmPassword'].touched" class="error-text">
+          ⚠️ Confirma tu contraseña
+        </div>
+      </div>
+
+      <button 
+        type="submit" 
+        class="modern-btn primary"
+        [disabled]="registerForm.invalid || isLoading">
+        <span *ngIf="!isLoading">Crear Cuenta</span>
+        <span *ngIf="isLoading" class="btn-loading">
+          <div class="spinner"></div>
+          Creando cuenta...
+        </span>
+      </button>
+    </form>
+
+    <!-- Mensajes del Sistema -->
+    <div *ngIf="message" class="system-message" [class]="message.includes('éxito') || message.includes('🎉') ? 'success' : 'error'">
+      <div class="message-icon">
+        <span *ngIf="message.includes('éxito') || message.includes('🎉')">✅</span>
+        <span *ngIf="!message.includes('éxito') && !message.includes('🎉')">⚠️</span>
+      </div>
+      <div class="message-text">{{ message }}</div>
+    </div>
+
+    <!-- Información de Desarrollo -->
+    <div class="dev-info" *ngIf="false">
+      <details>
+        <summary>🔧 Información de Desarrollo</summary>
+        <div class="dev-details">
+          <p><strong>Modo:</strong> {{ isLoginMode ? 'Login' : 'Registro' }}</p>
+          <p><strong>Token:</strong> {{ token ? '✅ Presente' : '❌ No hay token' }}</p>
+          <p><strong>Formulario válido:</strong> {{ isLoginMode ? loginForm.valid : registerForm.valid }}</p>
+        </div>
+      </details>
+    </div>
+  </div>
+
+  <!-- Fondo decorativo -->
+  <div class="background-shapes">
+    <div class="shape shape-1"></div>
+    <div class="shape shape-2"></div>
+    <div class="shape shape-3"></div>
+  </div>
+</div>

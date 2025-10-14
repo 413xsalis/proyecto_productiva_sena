@@ -1,0 +1,7 @@
+<div>
+  <h2>Usuarios</h2>
+  <div *ngIf="error" class="error">{{ error }}</div>
+  <ul>
+    <li *ngFor="let u of users">{{ u.username }} — {{ u.email }}</li>
+  </ul>
+</div>

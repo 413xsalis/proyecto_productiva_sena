@@ -9,15 +9,13 @@ ENV PYTHONPATH=/app
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copiar aplicación
+# Copiar aplicación (el contenido de app/ va directamente a /app)
 COPY app/ .
 
-# Verificar que los archivos estén correctos
+# Solo verificar que los archivos existen
 RUN echo "=== Verificando estructura ===" && \
     ls -la && \
-    echo "=== Verificando routes ===" && \
-    cat routes/user_routes.py && \
-    echo "=== Verificando schemas ===" && \
-    cat schemas/user_schema.py
+    echo "=== Archivos Python ===" && \
+    find . -name "*.py" | head -10
 
 CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]

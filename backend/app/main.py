@@ -2,14 +2,14 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 import time
 import traceback
-from core.database import engine, Base
 from models.user_model import User
+from core.database import engine, Base
 from routes.user_routes import router
 from fastapi import APIRouter
 
 
 print("Starting application...")
-time.sleep(25)
+time.sleep(15)
 
 try:
 

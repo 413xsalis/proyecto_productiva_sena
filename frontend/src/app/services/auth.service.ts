@@ -1,12 +1,13 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, tap } from 'rxjs';
+import { environment } from '../../environments/environment';
 
 @Injectable({
   providedIn: 'root'
 })
 export class AuthService {
-  private baseUrl = 'http://localhost:8000/api/users';
+  private baseUrl = `${environment.apiUrl}/users`;
 
   constructor(private http: HttpClient) {}
 
@@ -28,7 +29,6 @@ export class AuthService {
       })
     );
   }
-
   register(userData: { username: string; email: string; password: string }): Observable<any> {
     const url = `${this.baseUrl}/register`;
     console.log('🔍 Enviando registro a:', url, userData);

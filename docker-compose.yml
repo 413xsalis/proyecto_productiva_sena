@@ -8,16 +8,20 @@ services:
       - "8000:8000"
     volumes:
       - ./backend/app:/app
+      - uploads_volume:/app/uploads
     depends_on:
       db:
         condition: service_healthy
     environment:
-      - PYTHONPATH=/app
-      - DATABASE_URL=mysql+pymysql://user:password@db:3306/productiva_db
-      - SECRET_KEY=tu-clave-secreta-muy-segura-aqui-cambiar-en-produccion
+      - DATABASE_URL=${DATABASE_URL}
+      - SECRET_KEY=${SECRET_KEY}
+      - ALGORITHM=${ALGORITHM}
+      - ACCESS_TOKEN_EXPIRE_MINUTES=${ACCESS_TOKEN_EXPIRE_MINUTES}
+      - DEBUG=${DEBUG}
+      - ENVIRONMENT=${ENVIRONMENT}
+      - PYTHONPATH=${PYTHONPATH}
     command: >
-        sh -c "sleep 10 && uvicorn main:app --host 0.0.0.0 --port 8000 --reload"
-
+        sh -c "sleep 15 && uvicorn main:app --host 0.0.0.0 --port 8000 --reload"
     tty: true
     stdin_open: true
     networks:
@@ -29,15 +33,15 @@ services:
     container_name: mysql_db
     restart: always
     environment:
-      MYSQL_ROOT_PASSWORD: root
-      MYSQL_DATABASE: productiva_db
-      MYSQL_USER: user
-      MYSQL_PASSWORD: password
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
     ports:
-      - "3307:3306"
+      - "${MYSQL_PORT}:3306"
     volumes:
-      - ./data/mysql:/var/lib/mysql
-      - ./init.sql:/docker-entrypoint-initdb.d/init.sql  # Agregar script de inicialización
+      - mysql_data:/var/lib/mysql
+      - ./backend/init.sql:/docker-entrypoint-initdb.d/init.sql
     command:
       - --default-authentication-plugin=mysql_native_password
       - --wait-timeout=28800
@@ -45,7 +49,7 @@ services:
     networks:
       - productiva_net
     healthcheck:  
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uuser", "-ppassword"]
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u${MYSQL_USER}", "-p${MYSQL_PASSWORD}"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -58,12 +62,15 @@ services:
     depends_on:
       - web  
     ports:
-      - "80:80"
+      - "${NGINX_PORT}:80"
     networks:
       - productiva_net
+    environment:
+      - API_URL=${API_URL}
 
 volumes:
   mysql_data:
+  uploads_volume:
 
 networks:
   productiva_net:

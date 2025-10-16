@@ -2,94 +2,78 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 import time
 import traceback
+import os
 from models.user_model import User
 from core.database import engine, Base
-from routes.user_routes import router
-from fastapi import APIRouter
+from routes.user_routes import router as user_router
 from routes.excel_routes import router as excel_router
+from core.config import ALLOWED_ORIGINS, DEBUG, UPLOAD_DIR
 
+print("🚀 Iniciando aplicación FastAPI...")
+print(f"📊 Entorno: {os.getenv('ENVIRONMENT', 'development')}")
 
-import os
-os.makedirs("uploads/excel", exist_ok=True)
-
-
-print("Starting application...")
-time.sleep(15)
+time.sleep(10)
 
 try:
-
-
+    # Crear tablas
     Base.metadata.create_all(bind=engine)
-    print("Database tables created")
+    print("✅ Tablas de la base de datos creadas")
 
-    app = FastAPI(title="Proyecto Productiva MVC")
+    # Crear directorio de uploads
+    os.makedirs(UPLOAD_DIR, exist_ok=True)
+    print(f"✅ Directorio de uploads: {UPLOAD_DIR}")
 
+    # Crear aplicación
+    app = FastAPI(
+        title="Proyecto SENA Productiva",
+        description="Sistema de gestión con FastAPI + Angular + MySQL",
+        version="1.0.0",
+        debug=DEBUG
+    )
+
+    # Configurar CORS MEJORADO
     app.add_middleware(
         CORSMiddleware,
-        allow_origins=[
-            "http://localhost:4200",
-            "http://127.0.0.1:4200",
-            "http://frontend:4200"  
-        ],
+        allow_origins=ALLOWED_ORIGINS,
         allow_credentials=True,
-        allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+        allow_methods=["*"],
         allow_headers=["*"],
         expose_headers=["*"]
     )
 
+    # Manejar preflight OPTIONS requests
+    @app.middleware("http")
+    async def add_cors_headers(request, call_next):
+        response = await call_next(request)
+        if request.method == "OPTIONS":
+            response.headers["Access-Control-Allow-Origin"] = ", ".join(ALLOWED_ORIGINS)
+            response.headers["Access-Control-Allow-Methods"] = "GET, POST, PUT, DELETE, OPTIONS"
+            response.headers["Access-Control-Allow-Headers"] = "*"
+            response.headers["Access-Control-Allow-Credentials"] = "true"
+        return response
 
-    app.include_router(excel_router, prefix="/api")
+    # Incluir routers
+    app.include_router(user_router, prefix="/api", tags=["Usuarios"])
+    app.include_router(excel_router, prefix="/api", tags=["Archivos Excel"])
 
-
-    @app.options("/api/users/{path:path}")
-    async def options_handler():
-        return {"message": "OK"}
-
-    @app.options("/api/users/login")
-    async def login_options():
-        return {"message": "OK"}
-
-    @app.options("/api/users/register")
-    async def register_options():
-        return {"message": "OK"}
-
-    app.include_router(router, prefix="/api", tags=["Usuarios"])
-
+    # Rutas básicas
     @app.get("/")
     def root():
-        return {"message": "API funcionando con estructura MVC 🚀"}
+        return {"message": "API Proyecto SENA Productiva 🚀", "version": "1.0.0"}
 
     @app.get("/health")
     def health_check():
-        return {"status": "healthy"}
+        return {"status": "healthy", "database": "connected"}
 
-    print("Application ready with improved CORS")
+    print("✅ Aplicación FastAPI configurada correctamente")
+    print(f"🌐 CORS habilitado para: {ALLOWED_ORIGINS}")
 
 except Exception as error:
-    print(f"Error during startup: {error}")
+    print(f"❌ Error durante el inicio: {error}")
     traceback.print_exc()
     
-    app = FastAPI(title="Proyecto Productiva MVC - Basic Mode")
+    app = FastAPI(title="Proyecto SENA - Modo Emergencia")
     
-    # Configuración CORS 
-    app.add_middleware(
-        CORSMiddleware,
-        allow_origins=["http://localhost:4200", "http://127.0.0.1:4200"],
-        allow_credentials=True,
-        allow_methods=["*"],
-        allow_headers=["*"],
-    )
-    
-    basic_router = APIRouter(prefix="/users", tags=["Usuarios"])
-
-    @basic_router.post("/register")
-    def register_basic():
-        return {"message": "Servicio de registro temporalmente no disponible", "status": "error"}
-
-    @basic_router.post("/login")
-    def login_basic():
-        return {"message": "Servicio de login temporalmente no disponible", "status": "error"}
-
-    app.include_router(basic_router)
-    
-    print("Running in basic mode - endpoints available but database offline") 
+    @app.get("/")
+    def root_emergency():
+        return {"message": "⚠️ Modo emergencia - Revisar configuración"}

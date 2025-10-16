@@ -13,7 +13,6 @@ from utils.auth_utils import verify_password, create_access_token
 import traceback
 
 
-
 def get_all_users(db: Session):
     return db.query(User).all()
 

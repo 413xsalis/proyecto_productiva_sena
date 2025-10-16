@@ -2,18 +2,19 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { AuthService } from './auth.service';
+import { environment } from '../../environments/environment';
 
 @Injectable({
   providedIn: 'root'
 })
 export class ExcelService {
-  private baseUrl = 'http://localhost:8000/api/excel';
+  private baseUrl = `${environment.apiUrl}/excel`;
 
   constructor(
     private http: HttpClient,
     private authService: AuthService
   ) {}
-
+  
   private getHeaders(): HttpHeaders {
     const token = this.authService.getToken();
     console.log('🔐 Token obtenido:', token ? '✅ Presente' : '❌ Ausente');

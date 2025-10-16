@@ -16,10 +16,17 @@ export class ExcelUploadComponent implements OnInit {
   selectedFile: File | null = null;
   isDragging = false;
   isLoading = false;
-  isDeleting = false; // ✅ Propiedad agregada
+  isDeleting = false;
+  isProcessing = false;
+  processingFileId: number | null = null;
+  processingProgress = 0;
   message = '';
   messageType: 'success' | 'error' = 'success';
   userFiles: any[] = [];
+  
+  // Propiedades del dashboard
+  userName: string = 'admin12';
+  userEmail: string = 'admin@example.com';
 
   constructor(
     private fb: FormBuilder,
@@ -34,6 +41,20 @@ export class ExcelUploadComponent implements OnInit {
     this.loadMyFiles();
   }
 
+  // Métodos del dashboard
+  getUserInitials(): string {
+    return this.userName
+      .split(' ')
+      .map(name => name[0])
+      .join('')
+      .toUpperCase();
+  }
+
+  navigateToDashboard() {
+    this.router.navigate(['/dashboard']);
+  }
+
+  // Resto de métodos existentes...
   onFileSelected(event: any) {
     const file = event.target.files[0];
     this.handleFile(file);
@@ -59,7 +80,6 @@ export class ExcelUploadComponent implements OnInit {
   }
 
   handleFile(file: File) {
-    // Validar tipo de archivo
     const allowedExtensions = ['.xls', '.xlsx'];
     const fileExtension = '.' + file.name.split('.').pop()?.toLowerCase();
     
@@ -68,7 +88,6 @@ export class ExcelUploadComponent implements OnInit {
       return;
     }
 
-    // Validar tamaño (10MB máximo)
     if (file.size > 10 * 1024 * 1024) {
       this.showMessage('El archivo no debe superar los 10MB', 'error');
       return;
@@ -96,7 +115,7 @@ export class ExcelUploadComponent implements OnInit {
         this.showMessage('✅ Archivo subido exitosamente', 'success');
         this.selectedFile = null;
         this.uploadForm.reset();
-        this.loadMyFiles(); // Recargar la lista
+        this.loadMyFiles();
       },
       error: (error: any) => {
         this.isLoading = false;
@@ -107,12 +126,36 @@ export class ExcelUploadComponent implements OnInit {
   }
 
   processFile(fileId: number) {
+    this.isProcessing = true;
+    this.processingFileId = fileId;
+    this.processingProgress = 0;
+
+    // Simular progreso
+    const progressInterval = setInterval(() => {
+      this.processingProgress += 10;
+      if (this.processingProgress >= 90) {
+        clearInterval(progressInterval);
+      }
+    }, 300);
+
     this.excelService.processExcelFile(fileId).subscribe({
       next: (response: any) => {
-        this.showMessage(`✅ Archivo procesado: ${response.total_rows} filas procesadas`, 'success');
-        this.loadMyFiles(); // Recargar la lista
+        clearInterval(progressInterval);
+        this.processingProgress = 100;
+        
+        setTimeout(() => {
+          this.isProcessing = false;
+          this.processingFileId = null;
+          this.processingProgress = 0;
+          this.showMessage(`✅ Archivo procesado: ${response.total_rows} filas procesadas`, 'success');
+          this.loadMyFiles();
+        }, 500);
       },
       error: (error: any) => {
+        clearInterval(progressInterval);
+        this.isProcessing = false;
+        this.processingFileId = null;
+        this.processingProgress = 0;
         console.error('Error al procesar archivo:', error);
         this.showMessage(error.error?.detail || '❌ Error al procesar archivo', 'error');
       }
@@ -141,7 +184,7 @@ export class ExcelUploadComponent implements OnInit {
       next: (response: any) => {
         this.isDeleting = false;
         this.showMessage(`✅ Archivo "${fileName}" eliminado exitosamente`, 'success');
-        this.loadMyFiles(); // Recargar la lista
+        this.loadMyFiles();
       },
       error: (error: any) => {
         this.isDeleting = false;
@@ -153,7 +196,6 @@ export class ExcelUploadComponent implements OnInit {
 
   downloadFile(fileId: number, fileName: string) {
     this.showMessage('📥 Función de descarga en desarrollo...', 'success');
-    // Implementar descarga cuando esté lista en el backend
   }
 
   private showMessage(message: string, type: 'success' | 'error') {
@@ -175,9 +217,5 @@ export class ExcelUploadComponent implements OnInit {
   getDataKeys(data: any): string[] {
     if (!data || data.length === 0) return [];
     return Object.keys(data[0]);
-  }
-
-  navigateToDashboard() {
-    this.router.navigate(['/dashboard']);
   }
 }

@@ -6,7 +6,7 @@
         <div class="logo">🚀</div>
         <h1>Panel de Control</h1>
       </div>
-      
+
       <div class="user-menu">
         <div class="user-info">
           <div class="user-avatar">
@@ -67,21 +67,29 @@
           <p>Inicia un nuevo proyecto productivo</p>
           <button class="action-btn" disabled>Próximamente</button>
         </div>
-        
+        <!-- En la sección de Quick Actions, reemplaza una de las tarjetas: -->
+        <div class="action-card">
+          <div class="action-icon">📊</div>
+          <h4>Cargar Excel</h4>
+          <p>Sube y procesa archivos Excel</p>
+          <button class="action-btn" (click)="navigateToExcelUpload()">
+            Ir a Cargar
+          </button>
+        </div>
         <div class="action-card">
           <div class="action-icon">👥</div>
           <h4>Gestionar Usuarios</h4>
           <p>Administra usuarios del sistema</p>
           <button class="action-btn" disabled>Próximamente</button>
         </div>
-        
+
         <div class="action-card">
           <div class="action-icon">📈</div>
           <h4>Ver Reportes</h4>
           <p>Consulta estadísticas y reportes</p>
           <button class="action-btn" disabled>Próximamente</button>
         </div>
-        
+
         <div class="action-card">
           <div class="action-icon">⚙️</div>
           <h4>Configuración</h4>

@@ -1,0 +1,163 @@
+<div class="excel-upload-container">
+  <div class="upload-header">
+    <h2>📊 Cargador de Archivos Excel</h2>
+    <p>Sube, procesa y gestiona tus archivos Excel (.xls, .xlsx)</p>
+  </div>
+
+  <!-- Mensajes de estado -->
+  <div *ngIf="message" class="alert" [class.alert-success]="messageType === 'success'" [class.alert-error]="messageType === 'error'">
+    {{ message }}
+  </div>
+
+  <!-- Área de carga -->
+  <div class="upload-section">
+    <div 
+      class="upload-area" 
+      [class.dragging]="isDragging"
+      (dragover)="onDragOver($event)"
+      (dragleave)="onDragLeave($event)"
+      (drop)="onDrop($event)"
+    >
+      <div class="upload-content">
+        <div class="upload-icon">📁</div>
+        <h3>Arrastra tu archivo Excel aquí</h3>
+        <p>Formatos soportados: .xls, .xlsx (Máximo 10MB)</p>
+        
+        <label for="fileInput" class="browse-btn">
+          <span>Seleccionar archivo</span>
+          <input 
+            type="file" 
+            id="fileInput" 
+            (change)="onFileSelected($event)"
+            accept=".xls,.xlsx" 
+            hidden
+          >
+        </label>
+      </div>
+    </div>
+
+    <!-- Archivo seleccionado -->
+    <div *ngIf="selectedFile" class="selected-file">
+      <div class="file-info">
+        <span class="file-icon">📄</span>
+        <div class="file-details">
+          <strong>{{ selectedFile.name }}</strong>
+          <span>{{ formatFileSize(selectedFile.size) }}</span>
+        </div>
+        <button class="remove-btn" (click)="removeFile()">✕</button>
+      </div>
+      
+      <button 
+        class="upload-btn primary" 
+        (click)="onSubmit()" 
+        [disabled]="isLoading"
+      >
+        <span *ngIf="!isLoading">Subir Archivo</span>
+        <span *ngIf="isLoading" class="loading">
+          <div class="spinner"></div>
+          Subiendo...
+        </span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Lista de archivos subidos -->
+  <div class="files-section" *ngIf="userFiles.length > 0">
+    <h3>Tus archivos subidos ({{ userFiles.length }})</h3>
+    
+    <div class="files-grid">
+      <div *ngFor="let file of userFiles" class="file-card">
+        <div class="file-header">
+          <span class="file-name">{{ file.original_name }}</span>
+          <span class="file-status" [class]="file.status">
+            {{ file.status === 'pending' ? 'Pendiente' : 
+               file.status === 'processed' ? 'Procesado' : 'Error' }}
+          </span>
+        </div>
+        
+        <div class="file-meta">
+          <span class="file-size">{{ formatFileSize(file.file_size) }}</span>
+          <span class="file-date">{{ file.upload_date | date:'medium' }}</span>
+          <span class="file-uploader">Subido por: {{ file.uploaded_by }}</span>
+        </div>
+
+        <div class="file-actions">
+          <button 
+            *ngIf="file.status === 'pending'" 
+            class="process-btn"
+            (click)="processFile(file.id)"
+            [disabled]="isLoading"
+          >
+            Procesar
+          </button>
+          
+          <span *ngIf="file.status === 'processed'" class="success-badge">
+            ✅ Listo
+          </span>
+
+          <!-- Botones de acción -->
+          <div class="action-buttons">
+            <button 
+              class="download-btn"
+              (click)="downloadFile(file.id, file.original_name)"
+              [disabled]="isDeleting"
+              title="Descargar archivo"
+            >
+              📥
+            </button>
+            
+            <button 
+              class="delete-btn"
+              (click)="deleteFile(file.id, file.original_name)"
+              [disabled]="isDeleting"
+              title="Eliminar archivo"
+            >
+              <span *ngIf="!isDeleting">🗑️</span>
+              <span *ngIf="isDeleting" class="loading">
+                <div class="spinner-small"></div>
+              </span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Vista previa de datos procesados -->
+        <div *ngIf="file.status === 'processed' && file.processed_data" class="data-preview">
+          <h4>Vista Previa ({{ file.processed_data.length }} filas)</h4>
+          <div class="preview-table">
+            <table>
+              <thead>
+                <tr>
+                  <th *ngFor="let key of getDataKeys(file.processed_data)">{{ key }}</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let row of file.processed_data.slice(0, 5)">
+                  <td *ngFor="let key of getDataKeys(file.processed_data)">
+                    {{ row[key] }}
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+            <div *ngIf="file.processed_data.length > 5" class="preview-more">
+              ... y {{ file.processed_data.length - 5 }} filas más
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Estado vacío -->
+  <div *ngIf="userFiles.length === 0 && !selectedFile" class="empty-state">
+    <div class="empty-icon">📊</div>
+    <h3>No hay archivos subidos</h3>
+    <p>Sube tu primer archivo Excel para comenzar</p>
+  </div>
+
+  <!-- Botón de volver al dashboard -->
+  <div class="back-section">
+    <button class="back-btn" (click)="navigateToDashboard()">
+      ← Volver al Dashboard
+    </button>
+  </div>
+</div>

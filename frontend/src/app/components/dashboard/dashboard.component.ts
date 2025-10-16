@@ -11,13 +11,16 @@ import { AuthService } from '../../services/auth.service';
   styleUrls: ['./dashboard.component.css']
 })
 export class DashboardComponent implements OnInit {
-  userName: string = 'admin';
+  userName: string = 'admin12';
   userEmail: string = 'admin@example.com';
-
+  // Agrega este método a la clase DashboardComponent
+  navigateToExcelUpload() {
+    this.router.navigate(['/excel-upload']);
+  }
   constructor(
     private authService: AuthService,
     private router: Router
-  ) {}
+  ) { }
 
   ngOnInit() {
     this.loadUserData();

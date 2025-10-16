@@ -5,6 +5,14 @@ from schemas.user_schema import UserCreate, UserLogin
 from utils.auth_utils import hash_password, verify_password, create_access_token
 from sqlalchemy.orm import Session
 from models.user_model import User
+from fastapi import HTTPException, status
+from sqlalchemy.orm import Session
+from models.user_model import User
+from schemas.user_schema import UserLogin
+from utils.auth_utils import verify_password, create_access_token
+import traceback
+
+
 
 def get_all_users(db: Session):
     return db.query(User).all()
@@ -21,12 +29,6 @@ def register_user(db: Session, user: UserCreate):
     db.refresh(new_user)
     return new_user
 
-from fastapi import HTTPException, status
-from sqlalchemy.orm import Session
-from models.user_model import User
-from schemas.user_schema import UserLogin
-from utils.auth_utils import verify_password, create_access_token
-import traceback
 
 def login_user(db: Session, credentials: UserLogin):
     try:

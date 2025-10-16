@@ -6,6 +6,11 @@ from models.user_model import User
 from core.database import engine, Base
 from routes.user_routes import router
 from fastapi import APIRouter
+from routes.excel_routes import router as excel_router
+
+
+import os
+os.makedirs("uploads/excel", exist_ok=True)
 
 
 print("Starting application...")
@@ -31,6 +36,10 @@ try:
         allow_headers=["*"],
         expose_headers=["*"]
     )
+
+
+    app.include_router(excel_router, prefix="/api")
+
 
     @app.options("/api/users/{path:path}")
     async def options_handler():

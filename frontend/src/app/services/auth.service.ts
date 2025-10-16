@@ -52,7 +52,6 @@ export class AuthService {
     return !!this.getToken();
   }
 
-  // ✅ AGREGAR ESTE MÉTODO QUE FALTABA
   checkHealth(): Observable<any> {
     return this.http.get('http://localhost:8000/health');
   }
